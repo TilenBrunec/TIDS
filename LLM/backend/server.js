@@ -1,100 +1,136 @@
-const express = require("express");
-const cors = require("cors");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-require("dotenv").config();
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+// Import konfiguracij in middleware
+const { connectDatabase } = require('./config/database');
+const {
+  errorHandler,
+  notFound,
+  requestLogger,
+} = require('./middleware/errorHandler');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Import kontrolerjev
+const SongsController = require('./controllers/songsController');
+const HistoryController = require('./controllers/historyController');
 
-// model ime na enem mestu
-const MODEL_NAME = "gemini-2.5-flash";
+// Import routes
+const setupSongsRoutes = require('./routes/songs');
+const setupHistoryRoutes = require('./routes/history');
 
-console.log("Uporabljam Gemini model:", MODEL_NAME);
+/**
+ * Glavni aplikacijski server
+ */
+class MusicChatbotServer {
+  constructor() {
+    this.app = express();
+    this.port = process.env.PORT || 3001;
 
-app.post("/api/songs", async (req, res) => {
-  try {
-    const { message, count, genre } = req.body;
+    // Inicializacija kontrolerjev
+    this.songsController = new SongsController(process.env.GEMINI_API_KEY);
+    this.historyController = new HistoryController();
+  }
 
-    if (!message || typeof message !== "string") {
-      return res.status(400).json({ error: 'Manjka polje "message"' });
+  /**
+   * Konfiguracija middleware
+   */
+  setupMiddleware() {
+    // CORS za frontend
+    this.app.use(
+      cors({
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        credentials: true,
+      })
+    );
+
+    // Body parser
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+
+    // Request logging
+    this.app.use(requestLogger);
+  }
+
+  /**
+   * Konfiguracija routes
+   */
+  setupRoutes() {
+    // Health check endpoint
+    this.app.get('/health', (req, res) => {
+      res.json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        service: 'Music Chatbot API',
+      });
+    });
+
+    // API routes
+    this.app.use('/api/songs', setupSongsRoutes(this.songsController));
+    this.app.use('/api/history', setupHistoryRoutes(this.historyController));
+
+    // 404 handler
+    this.app.use(notFound);
+
+    // Error handler (mora biti zadnji)
+    this.app.use(errorHandler);
+  }
+
+  /**
+   * Inicializacija in zagon strežnika
+   */
+  async start() {
+    try {
+      // Povezava z MongoDB
+      await connectDatabase();
+
+      // Setup middleware in routes
+      this.setupMiddleware();
+      this.setupRoutes();
+
+      // Zagon strežnika
+      this.app.listen(this.port, () => {
+        console.log('');
+        console.log('🎵 ═══════════════════════════════════════════');
+        console.log(`🎵 Music Chatbot Server`);
+        console.log(`🎵 Port: ${this.port}`);
+        console.log(`🎵 URL: http://localhost:${this.port}`);
+        console.log(`🎵 Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log('🎵 ═══════════════════════════════════════════');
+        console.log('');
+      });
+    } catch (error) {
+      console.error('❌ Napaka pri zagonu strežnika:', error.message);
+      process.exit(1);
     }
+  }
 
-    const requestedCount = Math.min(10, Math.max(1, Number(count) || 5));
-    const normalizedGenre = genre && typeof genre === "string" ? genre : "any";
+  /**
+   * Graceful shutdown
+   */
+  setupGracefulShutdown() {
+    const shutdown = async (signal) => {
+      console.log(`\n⚠️  ${signal} signal prejet, zapiranje strežnika...`);
 
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+      try {
+        const { closeDatabase } = require('./config/database');
+        await closeDatabase();
+        process.exit(0);
+      } catch (error) {
+        console.error('❌ Napaka pri zapiranju:', error.message);
+        process.exit(1);
+      }
+    };
 
-    const prompt = `
-Uporabnikove želje (opis, izvajalci, vibe ipd.):
-"${message}"
-
-Uporabnik želi priporočila pesmi z naslednjimi parametri:
-- Število pesmi: ${requestedCount}
-- Žanr: ${normalizedGenre}
-
-Tvoja naloga:
-Vrni seznam pesmi, ki se čimbolj ujemajo z žanrom "${normalizedGenre}" in opisom uporabnika.
-Če ne najdeš dovolj natančnih ujemanj, predlagaj najbolj podobne pesmi.
-
-POMEMBNO:
-Odgovori SAMO z veljavnim JSON objektom, brez kakršnegakoli dodatnega besedila, brez markdown formatiranja in brez dodatnih znakov pred ali za JSON-om.
-
-NATANČEN FORMAT ODGOVORA:
-{
-  "songs": [
-    {
-      "title": "naslov pesmi",
-      "artist": "izvajalec",
-      "genre": "žanr",
-      "link": "YouTube ali Spotify link"
-    }
-  ]
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+  }
 }
 
-Pravila:
-- V polju "songs" vrni čim bližje ${requestedCount} pesmim (največ ${requestedCount}).
-- Vsaka pesem naj ima:
-  - resničen naslov in izvajalca,
-  - žanr, ki je čim bliže "${normalizedGenre}",
-  - delujoč YouTube ali Spotify link v polju "link".
-- Ne dodajaj nobenih komentarjev, razlag ali besedila izven JSON objekta.
-`;
+// Zagon strežnika
+if (require.main === module) {
+  const server = new MusicChatbotServer();
+  server.setupGracefulShutdown();
+  server.start();
+}
 
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-
-    let text = response.text().trim();
-
-    text = text
-      .replace(/```json\s*/gi, "")
-      .replace(/```\s*/g, "")
-      .trim();
-
-    let jsonData;
-    try {
-      jsonData = JSON.parse(text);
-    } catch (parseError) {
-      console.error("Napaka pri JSON.parse, besedilo modela:", text);
-      return res
-        .status(500)
-        .json({ error: "Napaka pri razčlenjevanju odgovora modela" });
-    }
-
-    if (Array.isArray(jsonData.songs)) {
-      jsonData.songs = jsonData.songs.slice(0, requestedCount);
-    }
-
-    res.json(jsonData);
-  } catch (error) {
-    console.error("Napaka:", error);
-    res.status(500).json({ error: "Napaka pri pridobivanju podatkov" });
-  }
-});
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server teče na http://localhost:${PORT}`);
-});
+module.exports = MusicChatbotServer;
