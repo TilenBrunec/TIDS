@@ -1,0 +1,89 @@
+.alternatives-table {
+  margin: 30px 0;
+}
+
+.alternatives-table h2 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+.add-alternative {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.alt-name-input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+}
+
+.add-alt-btn {
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.add-alt-btn:hover {
+  background-color: #2980b9;
+}
+
+.alternatives-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.alternatives-table th,
+.alternatives-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.alternatives-table th {
+  background-color: #34495e;
+  color: white;
+  font-weight: bold;
+}
+
+.alt-name {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.value-input {
+  width: 80px;
+  padding: 6px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.delete-alt-btn {
+  padding: 6px 12px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delete-alt-btn:hover {
+  background-color: #c0392b;
+}
+
+.warning {
+  color: #e74c3c;
+  font-style: italic;
+}

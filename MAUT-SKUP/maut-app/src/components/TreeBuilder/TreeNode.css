@@ -1,0 +1,84 @@
+.tree-node {
+  margin: 15px 0;
+  position: relative;
+}
+
+.node-content {
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #ecf0f1;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.node-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.node-name-input {
+  flex: 1;
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+}
+
+.delete-btn:hover {
+  transform: scale(1.2);
+}
+
+.node-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.node-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 14px;
+}
+
+.weight-input,
+.function-select {
+  padding: 6px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.add-child-btn {
+  padding: 8px 16px;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.add-child-btn:hover {
+  background-color: #27ae60;
+}
+
+.node-children {
+  margin-left: 40px;
+  margin-top: 15px;
+  padding-left: 20px;
+  border-left: 2px dashed #95a5a6;
+}
