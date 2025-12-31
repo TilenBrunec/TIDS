@@ -1,0 +1,75 @@
+.song-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: all var(--transition-fast);
+}
+
+.song-card:hover {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-subtle);
+  transform: translateY(-1px);
+}
+
+.song-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.song-info h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.song-artist {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.song-genre {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f3f4ff;
+  color: #3730a3;
+}
+
+.song-link {
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  color: var(--accent);
+  background: #f9fafb;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.song-link:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-subtle);
+  transform: translateY(-1px);
+}
+
+
+
+
+
+
