@@ -1,12 +1,53 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+/**
+ * Service za komunikacijo z Gemini AI
+ * Generira music recommendations brez baze
+ */
 class GeminiService {
   constructor(apiKey) {
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.modelName = 'gemini-2.5-flash';
   }
 
-  createSongPrompt(message, count, genre) {
+  /**
+   * Glavni metod za pridobivanje pesmi
+   * Uporablja samo AI generation (brez baze)
+   */
+  async getSongRecommendations(message, count, genre) {
+    try {
+      console.log(`🎵 Gemini AI generacija: ${count} pesmi, žanr: ${genre}`);
+
+      const prompt = this.createOriginalPrompt(message, count, genre);
+      const model = this.genAI.getGenerativeModel({ model: this.modelName });
+      const result = await model.generateContent(prompt);
+      const response = result.response;
+
+      let text = response.text().trim();
+
+      // Clean JSON
+      text = text
+        .replace(/```json\s*/gi, '')
+        .replace(/```\s*/g, '')
+        .trim();
+
+      const jsonData = JSON.parse(text);
+
+      if (Array.isArray(jsonData.songs)) {
+        jsonData.songs = jsonData.songs.slice(0, count);
+      }
+
+      return jsonData;
+    } catch (error) {
+      console.error('❌ Gemini AI napaka:', error.message);
+      throw new Error('Napaka pri generaciji pesmi: ' + error.message);
+    }
+  }
+
+  /**
+   * Originalni prompt (ko ni pesmi v bazi)
+   */
+  createOriginalPrompt(message, count, genre) {
     return `
 Uporabnikove želje (opis, izvajalci, vibe ipd.):
 "${message}"
@@ -42,40 +83,6 @@ Pravila:
   - delujoč YouTube ali Spotify link v polju "link".
 - Ne dodajaj nobenih komentarjev, razlag ali besedila izven JSON objekta.
 `;
-  }
-
-
-  async getSongRecommendations(message, count, genre) {
-    try {
-      const model = this.genAI.getGenerativeModel({ model: this.modelName });
-      const prompt = this.createSongPrompt(message, count, genre);
-
-      const result = await model.generateContent(prompt);
-      const response = result.response;
-
-    
-      let text = response
-        .text()
-        .trim()
-        .replace(/```json\s*/gi, '')
-        .replace(/```\s*/g, '')
-        .trim();
-
-      const jsonData = JSON.parse(text);
-
-      // Validacija
-      if (!Array.isArray(jsonData.songs)) {
-        throw new Error('Nepravilna struktura odgovora - manjka polje songs');
-      }
-
-   
-      jsonData.songs = jsonData.songs.slice(0, count);
-
-      return jsonData;
-    } catch (error) {
-      console.error('❌ Gemini service napaka:', error.message);
-      throw new Error('Napaka pri pridobivanju priporočil od AI');
-    }
   }
 }
 

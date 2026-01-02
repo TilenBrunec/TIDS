@@ -7,6 +7,8 @@
   flex-direction: column;
   border: 1px solid var(--border-subtle);
   height: 100%;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
 }
 
 .sidebar-header {

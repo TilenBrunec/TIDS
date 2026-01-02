@@ -13,10 +13,12 @@ const {
 // Import kontrolerjev
 const SongsController = require('./controllers/songsController');
 const HistoryController = require('./controllers/historyController');
+const BalkanController = require('./controllers/balkanController');
 
 // Import routes
 const setupSongsRoutes = require('./routes/songs');
 const setupHistoryRoutes = require('./routes/history');
+const setupBalkanRoutes = require('./routes/balkan');
 
 /**
  * Glavni aplikacijski server
@@ -29,6 +31,7 @@ class MusicChatbotServer {
     // Inicializacija kontrolerjev
     this.songsController = new SongsController(process.env.GEMINI_API_KEY);
     this.historyController = new HistoryController();
+    this.balkanController = new BalkanController();
   }
 
   /**
@@ -67,6 +70,7 @@ class MusicChatbotServer {
     // API routes
     this.app.use('/api/songs', setupSongsRoutes(this.songsController));
     this.app.use('/api/history', setupHistoryRoutes(this.historyController));
+    this.app.use('/api/balkan', setupBalkanRoutes(this.balkanController));
 
     // 404 handler
     this.app.use(notFound);

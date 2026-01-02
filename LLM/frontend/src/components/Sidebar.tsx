@@ -1,6 +1,7 @@
 import React from 'react';
 import { SessionPreview } from '../types';
 import { TrashIcon, PlusIcon } from './Icons';
+import BalkanScraper from './BalkanScraper';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -72,6 +73,9 @@ const Sidebar: React.FC<SidebarProps> = ({
         <PlusIcon />
         <span>Nov pogovor</span>
       </button>
+
+      {/* Balkan Scraper */}
+      <BalkanScraper />
 
       {/* Navigacija - Zgodovina */}
       <nav className="sidebar-nav">
