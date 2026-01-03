@@ -1,4 +1,4 @@
-.balkan-scraper {
+.json-upload {
   background: #ffffff;
   border-radius: 12px;
   padding: 12px;
@@ -8,12 +8,12 @@
   transition: all 0.2s;
 }
 
-.balkan-scraper:hover {
+.json-upload:hover {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-/* Collapsible Header */
-.scraper-header-collapsible {
+/* Header */
+.upload-header-collapsible {
   cursor: pointer;
   user-select: none;
 }
@@ -44,13 +44,13 @@
 
 .header-summary {
   font-size: 11px;
-  color: #d97706;
+  color: #ef4444;
   margin: 0;
   font-weight: 500;
 }
 
 /* Content */
-.scraper-content {
+.upload-content {
   padding-top: 12px;
   animation: slideDown 0.2s ease-out;
 }
@@ -66,11 +66,67 @@
   }
 }
 
-/* Scrape button */
-.scrape-button {
+/* Select file button - Gray */
+.select-file-button {
   width: 100%;
   padding: 10px 16px;
-  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+
+.select-file-button:hover:not(:disabled) {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.select-file-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.select-icon {
+  font-size: 16px;
+}
+
+/* Selected file info */
+.selected-file-info {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.file-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px 0;
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 11px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Upload button - Red gradient */
+.upload-button-json {
+  width: 100%;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -82,21 +138,22 @@
   justify-content: center;
   gap: 6px;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+  margin-bottom: 10px;
 }
 
-.scrape-button:hover:not(:disabled) {
+.upload-button-json:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
 }
 
-.scrape-button:disabled {
+.upload-button-json:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
 }
 
-.scrape-icon {
+.upload-icon {
   font-size: 16px;
 }
 
@@ -116,19 +173,19 @@
 }
 
 /* Compact Stats */
-.scrape-stats-compact {
+.upload-stats-compact {
   margin-top: 10px;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
 }
 
-.scrape-stats-compact.success {
-  background: #fffbeb;
-  border-color: #fcd34d;
+.upload-stats-compact.success {
+  background: #fee2e2;
+  border-color: #fca5a5;
 }
 
-.scrape-stats-compact.error {
+.upload-stats-compact.error {
   background: #fef2f2;
   border-color: #fca5a5;
 }
@@ -160,16 +217,7 @@
 .stat-value-compact {
   font-size: 16px;
   font-weight: 700;
-  color: #92400e;
-}
-
-.stats-week-compact {
-  font-size: 10px;
-  color: #6b7280;
-  margin: 6px 0 0 0;
-  padding-top: 6px;
-  border-top: 1px solid #fde68a;
-  text-align: center;
+  color: #b91c1c;
 }
 
 .error-message {
@@ -178,9 +226,37 @@
   margin: 0;
 }
 
+/* Format hint */
+.format-hint {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.hint-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 6px 0;
+}
+
+.hint-code {
+  display: block;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: #1f2937;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 8px;
+  overflow-x: auto;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
-  .balkan-scraper {
+  .json-upload {
     padding: 10px;
   }
 
@@ -188,7 +264,8 @@
     font-size: 14px;
   }
 
-  .scrape-button {
+  .select-file-button,
+  .upload-button-json {
     font-size: 13px;
     padding: 8px 14px;
   }

@@ -3,6 +3,7 @@ import { SessionPreview } from '../types';
 import { TrashIcon, PlusIcon } from './Icons';
 import BalkanScraper from './BalkanScraper';
 import SongsXmlImport from './SongXmlImport';
+import JsonUpload from './JsonUpload';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -80,6 +81,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Balkan Scraper */}
       <BalkanScraper />
+      {/* JSON Upload */}
+      <JsonUpload />
 
       {/* Navigacija - Zgodovina */}
       <nav className="sidebar-nav">

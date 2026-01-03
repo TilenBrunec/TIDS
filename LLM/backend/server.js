@@ -15,12 +15,17 @@ const SongsController = require('./controllers/songsController');
 const HistoryController = require('./controllers/historyController');
 const BalkanController = require('./controllers/balkanController');
 const SongsXmlController = require('./controllers/songsXmlController');
+const JsonUploadController = require('./controllers/jsonUploadController');
+
+// Import services
+const CronService = require('./services/cronService');
 
 // Import routes
 const setupSongsRoutes = require('./routes/songs');
 const setupHistoryRoutes = require('./routes/history');
 const setupBalkanRoutes = require('./routes/balkan');
 const setupSongsXmlRoutes = require('./routes/songsXml');
+const setupJsonUploadRoutes = require('./routes/jsonUpload');
 
 /**
  * Glavni aplikacijski server
@@ -35,6 +40,10 @@ class MusicChatbotServer {
     this.historyController = new HistoryController();
     this.balkanController = new BalkanController();
     this.songsXmlController = new SongsXmlController();
+    this.jsonUploadController = new JsonUploadController();
+
+    // Inicializacija Cron Service
+    this.cronService = new CronService(this.balkanController);
   }
 
   /**
@@ -73,8 +82,9 @@ class MusicChatbotServer {
     // API routes
     this.app.use('/api/songs', setupSongsRoutes(this.songsController));
     this.app.use('/api/history', setupHistoryRoutes(this.historyController));
-    this.app.use('/api/balkan', setupBalkanRoutes(this.balkanController));
+    this.app.use('/api/balkan', setupBalkanRoutes(this.balkanController, this.cronService));
     this.app.use('/api/songs-xml', setupSongsXmlRoutes(this.songsXmlController));
+    this.app.use('/api/json-upload', setupJsonUploadRoutes(this.jsonUploadController));
 
     // 404 handler
     this.app.use(notFound);
@@ -104,6 +114,14 @@ class MusicChatbotServer {
         console.log(`🎵 URL: http://localhost:${this.port}`);
         console.log(`🎵 Environment: ${process.env.NODE_ENV || 'development'}`);
         console.log('🎵 ═══════════════════════════════════════════');
+        console.log('');
+
+        // Zaženi avtomatski scraping (če je omogočen)
+        if (process.env.AUTO_SCRAPE_ENABLED === 'true') {
+          this.cronService.startBalkanAutoScrape();
+        } else {
+          console.log('⏰ Avtomatski scraping je onemogočen (AUTO_SCRAPE_ENABLED=false)');
+        }
         console.log('');
       });
     } catch (error) {

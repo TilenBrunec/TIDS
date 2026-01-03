@@ -4,7 +4,7 @@ const router = express.Router();
 /**
  * Konfiguracija routes za Balkan Top 100 scraper
  */
-function setupBalkanRoutes(balkanController) {
+function setupBalkanRoutes(balkanController, cronService = null) {
   /**
    * POST /api/balkan/scrape
    * Scrape in shrani Balkan Top 100
@@ -74,6 +74,39 @@ function setupBalkanRoutes(balkanController) {
   router.delete('/cleanup', (req, res) =>
     balkanController.cleanupOldCharts(req, res)
   );
+
+  /**
+   * GET /api/balkan/cron/status
+   * Pridobi status avtomatskega scrapinga
+   */
+  if (cronService) {
+    router.get('/cron/status', (req, res) => {
+      const status = cronService.getJobsStatus();
+      res.json({
+        success: true,
+        jobs: status,
+      });
+    });
+
+    /**
+     * POST /api/balkan/cron/test
+     * Ročni test scraping (takoj)
+     */
+    router.post('/cron/test', async (req, res) => {
+      try {
+        await cronService.runTestScrape();
+        res.json({
+          success: true,
+          message: 'Test scraping zagnan',
+        });
+      } catch (error) {
+        res.status(500).json({
+          error: 'Napaka pri test scrapingu',
+          message: error.message,
+        });
+      }
+    });
+  }
 
   return router;
 }

@@ -15,13 +15,14 @@ interface SongsXmlImportProps {
 }
 
 /**
- * Songs XML Import komponenta
+ * Songs XML Import komponenta - Collapsible verzija
  * Gumb za import pesmi iz XML files v bazo
  */
 const SongsXmlImport: React.FC<SongsXmlImportProps> = ({ onImportComplete }) => {
   const [isImporting, setIsImporting] = useState(false);
   const [importStats, setImportStats] = useState<ImportStats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   /**
    * Import pesmi iz XML
@@ -67,95 +68,80 @@ const SongsXmlImport: React.FC<SongsXmlImportProps> = ({ onImportComplete }) => 
 
   return (
     <div className="songs-xml-import">
-      <div className="import-header">
-        <h3>📁 XML Songs Import</h3>
-        <p className="import-subtitle">
-          Importiraj pesmi iz XML datotek v MongoDB bazo
-        </p>
-      </div>
-
-      {/* Import button */}
-      <button
-        onClick={handleImport}
-        disabled={isImporting}
-        className="import-button"
+      {/* Header - Clickable za collapse */}
+      <div 
+        className="import-header-collapsible"
+        onClick={() => setIsExpanded(!isExpanded)}
       >
-        {isImporting ? (
-          <>
-            <span className="spinner-small"></span>
-            Importing...
-          </>
-        ) : (
-          <>
-            <span className="import-icon">📂</span>
-            Importiraj XML Pesmi
-          </>
+        <div className="header-title">
+          <h3>📁 XML Songs</h3>
+          <span className={`collapse-icon ${isExpanded ? 'expanded' : ''}`}>
+            ▼
+          </span>
+        </div>
+        {!isExpanded && importStats && (
+          <p className="header-summary">
+            ✅ {importStats.totalSongs} pesmi
+          </p>
         )}
-      </button>
-
-      {/* Stats */}
-      {importStats && (
-        <div className="import-stats success">
-          <h4>✅ Import Uspešen!</h4>
-          <div className="stats-grid">
-            <div className="stat-item">
-              <span className="stat-label">Skupaj pesmi:</span>
-              <span className="stat-value">{importStats.totalSongs}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Novih:</span>
-              <span className="stat-value">{importStats.inserted}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Posodobljenih:</span>
-              <span className="stat-value">{importStats.updated}</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-label">Trajanje:</span>
-              <span className="stat-value">{importStats.duration}</span>
-            </div>
-          </div>
-
-          {/* By Region */}
-          <div className="region-stats">
-            <h5>Po regijah:</h5>
-            <div className="region-grid">
-              {Object.entries(importStats.byRegion).map(([region, count]) => (
-                <div key={region} className="region-item">
-                  <span className="region-name">{region}:</span>
-                  <span className="region-count">{count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <p className="stats-genres">
-            Žanrov: {importStats.byGenre}
-          </p>
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <div className="import-stats error">
-          <h4>❌ Napaka</h4>
-          <p>{error}</p>
-          <p className="error-hint">
-            Preveri če so XML files v backend/data directory
-          </p>
-        </div>
-      )}
-
-      {/* Info */}
-      <div className="import-info">
-        <p>
-          💡 <strong>Info:</strong> XML files morajo biti v{' '}
-          <code>backend/data/</code> directory.
-        </p>
-        <p>
-          Pesmi bodo shranjene v MongoDB collection <code>songs</code>.
-        </p>
       </div>
+
+      {/* Collapsible Content */}
+      {isExpanded && (
+        <div className="import-content">
+          {/* Import button */}
+          <button
+            onClick={handleImport}
+            disabled={isImporting}
+            className="import-button"
+          >
+            {isImporting ? (
+              <>
+                <span className="spinner-small"></span>
+                Importing...
+              </>
+            ) : (
+              <>
+                <span className="import-icon">📂</span>
+                Importiraj Pesmi
+              </>
+            )}
+          </button>
+
+          {/* Stats - Kompaktno */}
+          {importStats && (
+            <div className="import-stats-compact success">
+              <div className="stats-row">
+                <div className="stat-compact">
+                  <span className="stat-label-compact">Skupaj:</span>
+                  <span className="stat-value-compact">{importStats.totalSongs}</span>
+                </div>
+                <div className="stat-compact">
+                  <span className="stat-label-compact">Novih:</span>
+                  <span className="stat-value-compact">{importStats.inserted}</span>
+                </div>
+              </div>
+              <div className="stats-row">
+                <div className="stat-compact">
+                  <span className="stat-label-compact">Posodobljenih:</span>
+                  <span className="stat-value-compact">{importStats.updated}</span>
+                </div>
+                <div className="stat-compact">
+                  <span className="stat-label-compact">Čas:</span>
+                  <span className="stat-value-compact">{importStats.duration}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div className="import-stats-compact error">
+              <p className="error-message">❌ {error}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
