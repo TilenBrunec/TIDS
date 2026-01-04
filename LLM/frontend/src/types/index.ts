@@ -1,8 +1,15 @@
+/**
+ * Tipizacija za celotno aplikacijo
+ */
+
+// Song tip
 export interface Song {
   title: string;
   artist: string;
   genre: string;
+  region?: string;
   link: string;
+  reason?: string;
 }
 
 // Message tip

@@ -8,15 +8,25 @@ interface SongCardProps {
 
 /**
  * SongCard komponenta
- * Prikazuje info o pesmi
+ * Prikazuje info o pesmi (title, artist, genre, region, reason)
  */
 const SongCard: React.FC<SongCardProps> = ({ song }) => {
   return (
     <div className="song-card">
       <div className="song-info">
-        <h3>{song.title}</h3>
-        <p className="song-artist">{song.artist}</p>
-        <span className="song-genre">{song.genre}</span>
+        <h3 className="song-title">{song.title}</h3>
+        <p className="song-artist"> {song.artist}</p>
+        
+        <div className="song-metadata">
+          <span className="song-genre"> {song.genre}</span>
+          {song.region && (
+            <span className="song-region"> {song.region}</span>
+          )}
+        </div>
+          <br />
+        {song.reason && (
+          <p className="song-reason"> <b>Reason:</b>  {song.reason}</p>
+        )}
       </div>
 
       <a
@@ -25,7 +35,7 @@ const SongCard: React.FC<SongCardProps> = ({ song }) => {
         rel="noopener noreferrer"
         className="song-link"
       >
-        Poslušaj
+         Poslušaj
       </a>
     </div>
   );
