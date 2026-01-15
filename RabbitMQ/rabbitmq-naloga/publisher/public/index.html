@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publisher - Pošiljanje dogodkov</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 24px;
+        }
+        
+        .info-box {
+            background: rgba(6, 182, 212, 0.1);
+            border-left: 4px solid #06b6d4;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #67e8f9;
+            line-height: 1.6;
+        }
+        
+        .event-type-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .event-tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #94a3b8;
+            transition: all 0.3s;
+        }
+        
+        .event-tab:hover {
+            color: #06b6d4;
+        }
+        
+        .event-tab.active {
+            color: #06b6d4;
+            border-bottom-color: #06b6d4;
+        }
+        
+        .event-form {
+            display: none;
+        }
+        
+        .event-form.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        input:hover, textarea:hover, select:hover {
+            border-color: #06b6d4;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .send-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .send-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.5);
+        }
+        
+        .send-btn:active {
+            transform: translateY(0);
+        }
+        
+        .status {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #86efac;
+        }
+        
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📤 Publisher <span class="badge">Pošiljanje</span></h1>
+        <p class="subtitle">Pošiljaj dogodke v RabbitMQ vrsto</p>
+        
+        <div class="info-box">
+            ℹ️ Ta aplikacija pošilja dogodke v RabbitMQ. Odpri Consumer aplikacijo na portu 3001, da vidiš sporočila v realnem času!
+        </div>
+
+        <!-- Dodajanje uporabnika -->
+        <div class="card">
+            <h3>👤 Dodaj uporabnika</h3>
+            <form id="dodajUporabnikaForm">
+                <div class="form-group">
+                    <label>Ime uporabnika:</label>
+                    <input type="text" id="imeUporabnika" placeholder="npr. Janez Novak" required>
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="emailUporabnika" placeholder="janez.novak@email.com" required>
+                </div>
+                <button type="submit">Dodaj uporabnika</button>
+            </form>
+        </div>
+
+        <!-- Objava sporočila -->
+        <div class="card">
+            <h3>💬 Objavi sporočilo</h3>
+            <form id="objaviSporociloForm">
+                <div class="form-group">
+                    <label>Sporočilo:</label>
+                    <textarea id="besediloSporocila" placeholder="Napiši sporočilo..." required></textarea>
+                </div>
+                <button type="submit">Objavi sporočilo</button>
+            </form>
+        </div>
+
+        <!-- Brisanje elementa -->
+        <div class="card">
+            <h3>🗑️ Izbriši element</h3>
+            <form id="izbrisiElementForm">
+                <div class="form-group">
+                    <label>Tip elementa:</label>
+                    <select id="tipElementa" required>
+                        <option value="">Izberi tip...</option>
+                        <option value="uporabnik">Uporabnik</option>
+                        <option value="sporocilo">Sporočilo</option>
+                        <option value="naloga">Naloga</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ID elementa:</label>
+                    <input type="text" id="idElementa" placeholder="npr. 12345" required>
+                </div>
+                <button type="submit">Izbriši element</button>
+            </form>
+        </div>
+
+        <!-- Status sporočila -->
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        // Funkcija za pošiljanje dogodka
+        async function posljiDogodek(tip, podatki) {
+            try {
+                const response = await fetch(`${API_URL}/api/poslji-dogodek`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ tip, podatki })
+                });
+
+                const result = await response.json();
+                
+                if (result.uspeh) {
+                    prikaziSporocilo(`✓ Dogodek "${tip}" uspešno poslan!`, 'success');
+                } else {
+                    prikaziSporocilo(`✗ Napaka: ${result.napaka}`, 'error');
+                }
+            } catch (error) {
+                prikaziSporocilo(`✗ Napaka pri pošiljanju: ${error.message}`, 'error');
+            }
+        }
+
+        // Prikaz sporočila
+        function prikaziSporocilo(besedilo, tip) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = besedilo;
+            statusDiv.className = `status ${tip}`;
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Event listener za dodajanje uporabnika
+        document.getElementById('dodajUporabnikaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const ime = document.getElementById('imeUporabnika').value;
+            const email = document.getElementById('emailUporabnika').value;
+            
+            await posljiDogodek('UPORABNIK_DODAN', { ime, email });
+            
+            e.target.reset();
+        });
+
+        // Event listener za objavo sporočila
+        document.getElementById('objaviSporociloForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const besedilo = document.getElementById('besediloSporocila').value;
+            
+            await posljiDogodek('SPOROCILO_OBJAVLJENO', { besedilo });
+            
+            e.target.reset();
+        });
+
+        // Event listener za brisanje elementa
+        document.getElementById('izbrisiElementForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const tip = document.getElementById('tipElementa').value;
+            const id = document.getElementById('idElementa').value;
+            
+            await posljiDogodek('ELEMENT_IZBRISAN', { tip, id });
+            
+            e.target.reset();
+        });
+    </script>
+</body>
+</html>

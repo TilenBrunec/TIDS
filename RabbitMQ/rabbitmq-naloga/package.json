@@ -1,0 +1,23 @@
+{
+  "name": "rabbitmq-naloga",
+  "version": "1.0.0",
+  "description": "Dogodkovno vodilo z RabbitMQ",
+  "main": "index.js",
+  "scripts": {
+    "publisher": "node publisher/server.js",
+    "consumer": "node consumer/server.js",
+    "start": "node publisher/server.js"
+  },
+  "keywords": [
+    "rabbitmq",
+    "nodejs",
+    "events"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="sl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consumer - Prejemanje dogodkov</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          "Helvetica", "Arial", sans-serif;
+        background: linear-gradient(
+          135deg,
+          #18181b 0%,
+          #27272a 50%,
+          #3f3f46 100%
+        );
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .header {
+        background: #27272a;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid #3f3f46;
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #fbbf24;
+      }
+
+      .status-badge {
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .status-badge.connected {
+        background: rgba(34, 197, 94, 0.2);
+        color: #86efac;
+        border: 1px solid #22c55e;
+      }
+
+      .status-badge.disconnected {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        border: 1px solid #ef4444;
+      }
+
+      .subtitle {
+        color: #a1a1aa;
+        font-size: 14px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      }
+
+      .stat-number {
+        font-size: 32px;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .events-container {
+        background: #27272a;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        padding: 24px;
+        max-height: 600px;
+        overflow-y: auto;
+        border: 1px solid #3f3f46;
+      }
+
+      .events-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #3f3f46;
+      }
+
+      .events-header h2 {
+        color: #fbbf24;
+        font-size: 20px;
+      }
+
+      .clear-btn {
+        padding: 8px 20px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      .clear-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+      }
+
+      .event-item {
+        background: #18181b;
+        border-left: 4px solid #f59e0b;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        animation: slideIn 0.3s ease;
+        transition: all 0.3s;
+        border: 1px solid #3f3f46;
+      }
+
+      .event-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+        border-left-color: #fbbf24;
+      }
+
+      .event-item.new {
+        animation: slideIn 0.3s ease, highlight 1s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes highlight {
+        0%,
+        100% {
+          background: #18181b;
+        }
+        50% {
+          background: rgba(245, 158, 11, 0.1);
+        }
+      }
+
+      .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .event-type {
+        font-weight: 600;
+        color: #fbbf24;
+        font-size: 15px;
+      }
+
+      .event-badge {
+        padding: 4px 10px;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border-radius: 12px;
+        font-size: 11px;
+        margin-left: 10px;
+      }
+
+      .event-time {
+        font-size: 12px;
+        color: #71717a;
+      }
+
+      .event-data {
+        color: #d4d4d8;
+        line-height: 1.6;
+        font-size: 14px;
+      }
+
+      .event-data strong {
+        color: #fbbf24;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #71717a;
+      }
+
+      .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+        opacity: 0.3;
+      }
+
+      .empty-state h3 {
+        margin-bottom: 10px;
+        color: #a1a1aa;
+      }
+
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #27272a;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        animation: slideInRight 0.3s ease;
+        z-index: 1000;
+        max-width: 350px;
+        border: 1px solid #f59e0b;
+      }
+
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(100px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .notification-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #fbbf24;
+      }
+
+      .notification-text {
+        font-size: 14px;
+        color: #d4d4d8;
+      }
+
+      /* Scrollbar styling */
+      .events-container::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .events-container::-webkit-scrollbar-track {
+        background: #18181b;
+        border-radius: 10px;
+      }
+
+      .events-container::-webkit-scrollbar-thumb {
+        background: #f59e0b;
+        border-radius: 10px;
+      }
+
+      .events-container::-webkit-scrollbar-thumb:hover {
+        background: #fbbf24;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div>
+          <h1>
+            📥 Consumer
+            <span id="statusBadge" class="status disconnected"
+              >Ni povezave</span
+            >
+          </h1>
+          <p class="subtitle">Prejemanje dogodkov iz RabbitMQ v realnem času</p>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-number" id="totalEvents">0</div>
+            <div class="stat-label">Skupaj dogodkov</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="newEvents">0</div>
+            <div class="stat-label">Novih v zadnji minuti</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="eventsPerMinute">0</div>
+            <div class="stat-label">Dogodkov/minuto</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="events-container">
+        <div class="events-header">
+          <h2>🔔 Prejeti dogodki</h2>
+          <button class="clear-btn" onclick="pocistiDogodke()">
+            Počisti vse
+          </button>
+        </div>
+
+        <div id="eventsList">
+          <div class="empty-state">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+              />
+            </svg>
+            <h3>Ni še dogodkov</h3>
+            <p>Odpri Publisher aplikacijo in pošlji dogodek!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:3001";
+      let dogodki = [];
+      let noviDogodki = 0;
+      let zacetekMinute = Date.now();
+
+      // Poveži se na SSE stream
+      function poveziStream() {
+        const eventSource = new EventSource(`${API_URL}/api/dogodki/stream`);
+
+        eventSource.onopen = () => {
+          console.log("✓ Povezan na dogodkovni stream");
+          document.getElementById("statusBadge").textContent = "Povezan";
+          document.getElementById("statusBadge").className = "status connected";
+        };
+
+        eventSource.onmessage = (event) => {
+          const dogodek = JSON.parse(event.data);
+
+          if (dogodek.tip !== "POVEZAVA") {
+            dodajDogodek(dogodek);
+            prikaziNotifikacijo(dogodek);
+          }
+        };
+
+        eventSource.onerror = () => {
+          console.log("✗ Napaka pri povezavi");
+          document.getElementById("statusBadge").textContent = "Ni povezave";
+          document.getElementById("statusBadge").className =
+            "status disconnected";
+
+          // Poskusi ponovno povezavo čez 3 sekunde
+          setTimeout(() => {
+            eventSource.close();
+            poveziStream();
+          }, 3000);
+        };
+      }
+
+      // Dodaj dogodek v seznam
+      function dodajDogodek(dogodek) {
+        dogodki.unshift(dogodek);
+        noviDogodki++;
+
+        posodobiStatistiko();
+        izrisiDogodke();
+      }
+
+      // Izriši dogodke
+      function izrisiDogodke() {
+        const seznam = document.getElementById("eventsList");
+
+        if (dogodki.length === 0) {
+          seznam.innerHTML = `
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <h3>Ni še dogodkov</h3>
+                        <p>Odpri Publisher aplikacijo in pošlji dogodek!</p>
+                    </div>
+                `;
+          return;
+        }
+
+        seznam.innerHTML = dogodki
+          .map((dogodek, index) => {
+            const cas = new Date(dogodek.cas).toLocaleString("sl-SI");
+            const isNew = index === 0;
+
+            return `
+                    <div class="event-item ${isNew ? "new" : ""}">
+                        <div class="event-header">
+                            <div>
+                                <span class="event-type">${formatirajTip(
+                                  dogodek.tip
+                                )}</span>
+                                ${
+                                  isNew
+                                    ? '<span class="event-badge">NOVO</span>'
+                                    : ""
+                                }
+                            </div>
+                            <span class="event-time">${cas}</span>
+                        </div>
+                        <div class="event-data">
+                            ${formatirajPodatke(dogodek)}
+                        </div>
+                    </div>
+                `;
+          })
+          .join("");
+      }
+
+      // Formatiraj tip dogodka
+      function formatirajTip(tip) {
+        const ikone = {
+          UPORABNIK_DODAN: "👤",
+          SPOROCILO_OBJAVLJENO: "💬",
+          ELEMENT_IZBRISAN: "🗑️",
+        };
+
+        return `${ikone[tip] || "📌"} ${tip.replace(/_/g, " ")}`;
+      }
+
+      // Formatiraj podatke
+      function formatirajPodatke(dogodek) {
+        const { podatki } = dogodek;
+
+        if (dogodek.tip === "UPORABNIK_DODAN") {
+          return `<strong>Ime:</strong> ${podatki.ime}<br><strong>Email:</strong> ${podatki.email}`;
+        } else if (dogodek.tip === "SPOROCILO_OBJAVLJENO") {
+          return `<strong>Sporočilo:</strong> ${podatki.besedilo}`;
+        } else if (dogodek.tip === "ELEMENT_IZBRISAN") {
+          return `<strong>Tip:</strong> ${podatki.tip}<br><strong>ID:</strong> ${podatki.id}`;
+        }
+
+        return JSON.stringify(podatki);
+      }
+
+      // Prikaži notifikacijo
+      function prikaziNotifikacijo(dogodek) {
+        const notif = document.createElement("div");
+        notif.className = "notification";
+        notif.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 5px; color: #667eea;">
+                    ${formatirajTip(dogodek.tip)}
+                </div>
+                <div style="font-size: 14px; color: #666;">
+                    Nov dogodek prejet!
+                </div>
+            `;
+
+        document.body.appendChild(notif);
+
+        setTimeout(() => {
+          notif.style.opacity = "0";
+          setTimeout(() => notif.remove(), 300);
+        }, 3000);
+      }
+
+      // Posodobi statistiko
+      function posodobiStatistiko() {
+        document.getElementById("totalEvents").textContent = dogodki.length;
+        document.getElementById("newEvents").textContent = noviDogodki;
+
+        const minuta = (Date.now() - zacetekMinute) / 60000;
+        const perMinute = minuta > 0 ? Math.round(dogodki.length / minuta) : 0;
+        document.getElementById("eventsPerMinute").textContent = perMinute;
+      }
+
+      // Počisti dogodke
+      function pocistiDogodke() {
+        if (confirm("Ali res želiš počistiti vse dogodke?")) {
+          dogodki = [];
+          noviDogodki = 0;
+          posodobiStatistiko();
+          izrisiDogodke();
+        }
+      }
+
+      // Resetiraj števec novih dogodkov vsako minuto
+      setInterval(() => {
+        noviDogodki = 0;
+        posodobiStatistiko();
+      }, 60000);
+
+      // Zagon
+      poveziStream();
+    </script>
+  </body>
+</html>
